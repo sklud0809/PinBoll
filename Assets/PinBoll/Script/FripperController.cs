@@ -10,6 +10,13 @@ public class FripperController : MonoBehaviour
     private float flickAngle = -20;
     private int fingerId = -1;
 
+    float RightScreenMax = 0.0f;
+    float RightScreenMin = 0.0f;
+    
+    float LeftScreenMax = 0.0f;
+    float LeftScreenMin = 0.0f;
+    
+
     enum State
     {
         _defaultAngle,
@@ -22,29 +29,38 @@ public class FripperController : MonoBehaviour
 
         SetAngle(this.defaultAngle);
         state = State._defaultAngle;
-        
+
+
+        //タッチのｘ座標の範囲指定
+        RightScreenMax = Screen.width;
+        RightScreenMin = Screen.width / 2;
+
+        LeftScreenMax = Screen.width / 2;
+        LeftScreenMin = 0.0f;
+   
+    
     }
 
 
     void Update()
     {
         //Debug.Log(Input.touchCount);
-        
+       
        
         if (Input.touchCount > 0)
         {
             foreach(Touch touch in Input.touches)
             {
-               
 
 
 
-                
-               if(touch.phase == TouchPhase.Began)
+
+                　//右スクリーンタップ時にフリッパーが上がる
+                if (RightScreenMax >= touch.position.x && RightScreenMin <= touch.position.x && tag == "RightFripperTag")
                 {
 
-                   
-                    if ( Input.GetMouseButton(0) && Input.mousePosition.x >= Screen.width / 2 && tag == "RightFripperTag")
+                    　　//タッチしている間フリッパーが上がる
+                    if (touch.phase == TouchPhase.Began)
                     {
 
                         fingerId = touch.fingerId;
@@ -55,37 +71,37 @@ public class FripperController : MonoBehaviour
                         state = State._flickAngle;
 
                     }
-                    else if(Input.GetMouseButton(0) && Input.mousePosition.x <= Screen.width / 2 && tag == "LeftFripperTag")
+                    //タッチ状態から話すと、フリッパーが下がる
+                   else if (touch.phase == TouchPhase.Ended)
+                    {
+                        if (  RightScreenMax >= touch.position.x &&  RightScreenMin <= touch.position.x && tag == "RightFripperTag")
+                        {
+                            SetAngle(this.defaultAngle);
+                            state = State._defaultAngle;
+                        }
+                    }
+
+                }
+               else if (LeftScreenMax >= touch.position.x && LeftScreenMin <= touch.position.x && tag == "LeftFripperTag") 
+                {
+                    if (touch.phase == TouchPhase.Began)
                     {
                         fingerId = touch.fingerId;
                         Debug.Log(this.fingerId + "左");
                         SetAngle(this.flickAngle);
                         state = State._flickAngle;
-                    }
 
-                }
-               else if(touch.phase == TouchPhase.Ended)
-                {
-                    if(Input.GetMouseButtonUp(0) && Input.mousePosition.x >= Screen.width / 2 && tag == "RightFripperTag")
-                    {
-
-                        SetAngle(this.defaultAngle);
-                        state = State._defaultAngle;
                     }
-                    else if(Input.GetMouseButtonUp(0) && Input.mousePosition.x <= Screen.width / 2 && tag == "LeftFripperTag")
+                    else if (touch.phase == TouchPhase.Ended)
                     {
-                        SetAngle(this.defaultAngle);
-                        state = State._defaultAngle;
+                        if (LeftScreenMax >= touch.position.x &&  LeftScreenMin <= touch.position.x && tag == "LeftFripperTag")
+                        {
+                            SetAngle(this.defaultAngle);
+                            state = State._defaultAngle;
+                        }
                     }
                 }
-
-
-                
-
-
-            }
-           
-
+            }　　　　
         }
         else if (state == State._flickAngle)
         {
@@ -122,6 +138,7 @@ public class FripperController : MonoBehaviour
         this.myHingeJoint.spring = joinspr;
     }
 
-    
+   
+
     
 }
